@@ -41,10 +41,14 @@ class DWConv(Conv):
     def __init__(self, c1, c2, k=1, s=1, d=1, act=True):
         super().__init__(c1, c2, k, s, g=math.gcd(c1, c2), d=d, act=act)
 
+
+# Dissimilarity Attention #todo: attention
+class DissAttn(nn.Module):
+    pass
     
 # Lightweight Cascade Multi-Receptive Fields Module
-class CMRF(nn.Module):
-    """CMRF Module with args(ch_in, ch_out, number, shortcut, groups, expansion)."""
+class CMRF_Attn(nn.Module):
+    """CMRF_Attn Module with args(ch_in, ch_out, number, shortcut, groups, expansion)."""
     def __init__(self, c1, c2, N=8, shortcut=True, g=1, e=0.5):
         super().__init__()
         
@@ -55,9 +59,10 @@ class CMRF(nn.Module):
         self.pwconv1   = Conv(c1, c2//self.N, 1, 1)
         self.pwconv2   = Conv(c2//2, c2, 1, 1)
         self.m         = nn.ModuleList(DWConv(self.c, self.c, k=3, act=False) for _ in range(N-1))
+        # self.attention  = DissAttn(c2, c2) #todo: attention
 
     def forward(self, x):
-        """Forward pass through CMRF Module."""
+        """Forward pass through CMRF_Attn Module."""
         x_residual = x
         x          = self.pwconv1(x)
 
@@ -68,6 +73,7 @@ class CMRF(nn.Module):
         
         y          = torch.cat(x, dim=1) 
         y          = self.pwconv2(y)
+        # y          = DissAttn(y) #todo: attention
         return x_residual + y if self.add else y
 
 
@@ -78,11 +84,11 @@ U-shape/U-like Model
 class UNetEncoder(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(UNetEncoder, self).__init__()
-        self.cmrf       = CMRF(in_channels, out_channels)
+        self.cmrf_attn  = CMRF_Attn(in_channels, out_channels)
         self.downsample = nn.MaxPool2d(kernel_size=2, stride=2)
         
     def forward(self, x):
-        x = self.cmrf(x)
+        x = self.cmrf_attn(x)
         return self.downsample(x), x
     
 
@@ -90,25 +96,25 @@ class UNetEncoder(nn.Module):
 class UNetDecoder(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(UNetDecoder, self).__init__()
-        self.cmrf      = CMRF(in_channels, out_channels)
+        self.cmrf_attn = CMRF_Attn(in_channels, out_channels)
         self.upsample  = F.interpolate
         
     def forward(self, x, skip_connection):
         x = self.upsample(x, scale_factor=2, mode='bicubic', align_corners=False)
         x = torch.cat([x, skip_connection], dim=1)
-        x = self.cmrf(x)
+        x = self.cmrf_attn(x)
         return x
     
 
 # TinyU-Net
-class TinyUNet(nn.Module):
+class TinyUNeXt(nn.Module):
     """TinyU-Net with args(in_channels, num_classes)."""
     '''
     in_channels: The number of input channels
     num_classes: The number of segmentation classes
     '''
     def __init__(self, in_channels=3, num_classes=2):
-        super(TinyUNet, self).__init__()
+        super(TinyUNeXt, self).__init__()
         in_filters      = [192, 384, 768, 1024]
         out_filters     = [64, 128, 256, 512]
         
@@ -138,7 +144,7 @@ class TinyUNet(nn.Module):
 
 
 if __name__ == '__main__':
-    model         = TinyUNet(in_channels=3, num_classes=2)
+    model         = TinyUNeXt(in_channels=3, num_classes=2)
 
     device        = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model         = model.to(device)

@@ -106,7 +106,7 @@ class UNetDecoder(nn.Module):
         return x
     
 
-# TinyU-Net
+# TinyU-NeXt
 class TinyUNeXt(nn.Module):
     """TinyU-Net with args(in_channels, num_classes)."""
     '''

@@ -106,15 +106,15 @@ class UNetDecoder(nn.Module):
         return x
     
 
-# TinyU-NeXt
-class TinyUNeXt(nn.Module):
+# TinyAttnU-Net
+class TinyAttnUNet(nn.Module):
     """TinyU-Net with args(in_channels, num_classes)."""
     '''
     in_channels: The number of input channels
     num_classes: The number of segmentation classes
     '''
     def __init__(self, in_channels=3, num_classes=2):
-        super(TinyUNeXt, self).__init__()
+        super(TinyAttnUNet, self).__init__()
         in_filters      = [192, 384, 768, 1024]
         out_filters     = [64, 128, 256, 512]
         
@@ -144,7 +144,7 @@ class TinyUNeXt(nn.Module):
 
 
 if __name__ == '__main__':
-    model         = TinyUNeXt(in_channels=3, num_classes=2)
+    model         = TinyAttnUNet(in_channels=3, num_classes=2)
 
     device        = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model         = model.to(device)

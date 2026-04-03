@@ -12,26 +12,6 @@ In this paper, we extend [TinyU-Net](https://github.com/ChenJunren-Lab/TinyU-Net
 
 ## BibTex
 ```bibtex
-@article{Chen_PLDet,
-        title     = {PLDet: Intra-layer Multi-scale Perception and Local Space Attention for Pulmonary Lesion Detection in CT Images},
-        author    = {Junren Chen and Wei Wang and Junlong Cheng and Gang Liang and Lei Zhang and Liangyin Chen},
-        journal   = {Biomedical Signal Processing and Control},
-        volume    = {120},
-        pages     = {110087},
-        year      = {2026},
-        issn      = {1746-8094},
-        doi       = {https://doi.org/10.1016/j.bspc.2026.110087},
-        url       = {https://www.sciencedirect.com/science/article/pii/S1746809426006415},
-}
-
-@InProceedings{Chen_NSDA_NeurIPS2025Spotlight,
-        title     = {Neighborhood Self-Dissimilarity Attention for Medical Image Segmentation},
-        author    = {Chen, Junren and Chen, Rui and Wang, Wei and Cheng, Junlong and Liang, Gang and Zhang, Lei and Chen, Liangyin},
-        year      = {2025},
-        booktitle = {The Thirty-ninth Annual Conference on Neural Information Processing Systems}
-        # todo: add publisher, volume, month, pages
-}
-
 @InProceedings{Chen_TinyUNet_MICCAI2024Oral,
         title     = {TinyU-Net: Lighter Yet Better U-Net with Cascaded Multi-receptive Fields},
         author    = {Chen, Junren and Chen, Rui and Wang, Wei and Cheng, Junlong and Zhang, Lei and Chen, Liangyin},

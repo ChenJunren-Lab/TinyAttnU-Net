@@ -154,7 +154,7 @@ if __name__ == '__main__':
     dummy_input   = torch.randn(1, 3, 256, 256).to(device)
     macs, params = profile(model, (dummy_input, ), verbose=False)
     #-------------------------------------------------------------------------------#
-    #   flops * 2 because profile does not consider convolution as two operations.
+    #   macs * 2 because the profile does not consider convolution as two operations.
     #-------------------------------------------------------------------------------#
     flops         = macs * 2
     flops, params = clever_format([flops, params], "%.4f")

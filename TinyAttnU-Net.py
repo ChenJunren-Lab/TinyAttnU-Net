@@ -47,8 +47,8 @@ class DissAttn(nn.Module):
     pass
     
 # Lightweight Cascade Multi-Receptive Fields Module
-class CMRF_Attn(nn.Module):
-    """CMRF_Attn Module with args(ch_in, ch_out, number, shortcut, groups, expansion)."""
+class CMRFM_Attn(nn.Module):
+    """CMRFM_Attn Module with args(ch_in, ch_out, number, shortcut, groups, expansion)."""
     def __init__(self, c1, c2, N=8, shortcut=True, g=1, e=0.5):
         super().__init__()
         
@@ -59,10 +59,10 @@ class CMRF_Attn(nn.Module):
         self.pwconv1   = Conv(c1, c2//self.N, 1, 1)
         self.pwconv2   = Conv(c2//2, c2, 1, 1)
         self.m         = nn.ModuleList(DWConv(self.c, self.c, k=3, act=False) for _ in range(N-1))
-        # self.attention  = DissAttn(c2, c2) #todo: attention
+        self.attention  = DissAttn(c2, c2) #todo: attention
 
     def forward(self, x):
-        """Forward pass through CMRF_Attn Module."""
+        """Forward pass through CMRFM_Attn Module."""
         x_residual = x
         x          = self.pwconv1(x)
 
@@ -73,7 +73,7 @@ class CMRF_Attn(nn.Module):
         
         y          = torch.cat(x, dim=1) 
         y          = self.pwconv2(y)
-        # y          = DissAttn(y) #todo: attention
+        y          = DissAttn(y) #todo: attention
         return x_residual + y if self.add else y
 
 
@@ -84,11 +84,11 @@ U-shape/U-like Model
 class UNetEncoder(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(UNetEncoder, self).__init__()
-        self.cmrf_attn  = CMRF_Attn(in_channels, out_channels)
+        self.CMRFM_Attn  = CMRFM_Attn(in_channels, out_channels)
         self.downsample = nn.MaxPool2d(kernel_size=2, stride=2)
         
     def forward(self, x):
-        x = self.cmrf_attn(x)
+        x = self.CMRFM_Attn(x)
         return self.downsample(x), x
     
 
@@ -96,13 +96,13 @@ class UNetEncoder(nn.Module):
 class UNetDecoder(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(UNetDecoder, self).__init__()
-        self.cmrf_attn = CMRF_Attn(in_channels, out_channels)
+        self.CMRFM_Attn = CMRFM_Attn(in_channels, out_channels)
         self.upsample  = F.interpolate
         
     def forward(self, x, skip_connection):
         x = self.upsample(x, scale_factor=2, mode='bicubic', align_corners=False)
         x = torch.cat([x, skip_connection], dim=1)
-        x = self.cmrf_attn(x)
+        x = self.CMRFM_Attn(x)
         return x
     
 
@@ -152,11 +152,11 @@ if __name__ == '__main__':
     # summary(model, (3, 256, 256))
         
     dummy_input   = torch.randn(1, 3, 256, 256).to(device)
-    flops, params = profile(model, (dummy_input, ), verbose=False)
+    macs, params = profile(model, (dummy_input, ), verbose=False)
     #-------------------------------------------------------------------------------#
     #   flops * 2 because profile does not consider convolution as two operations.
     #-------------------------------------------------------------------------------#
-    flops         = flops * 2
+    flops         = macs * 2
     flops, params = clever_format([flops, params], "%.4f")
     print(f'Total GFLOPs: {flops}')
     print(f'Total Params: {params}')
